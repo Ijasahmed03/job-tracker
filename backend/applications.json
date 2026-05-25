@@ -1,16 +1,10 @@
 [
   {
-    "company": "Wipro",
-    "role": "Jr.Developer",
-    "status": "applied",
-    "date_applied": "24-05-2026",
-    "notes": "first job in the project list"
-  },
-  {
-    "company": "GOOGLE",
-    "role": "Software Engineer",
+    "company": "Google",
+    "role": "Software Developer",
     "status": "offer",
     "date_applied": "25-05-2026",
-    "notes": "Dream"
+    "notes": "Dream On",
+    "id": 1
   }
 ]
