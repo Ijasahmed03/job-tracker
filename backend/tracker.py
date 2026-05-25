@@ -30,10 +30,12 @@ def add_application(company, role, status, date_applied, notes=""):
     save_applications(applications)
     print(f"Added: {role} at {company}")
 
-def list_applications():
+def list_applications(status_filter = None):
     applications = load_applications()
     if not applications:
         print("No applications yet.")
         return
     for i, app in enumerate(applications, 1):
+        if status_filter and app['status'] != status_filter:
+            continue
         print(f"{i}. {app['role']} at {app['company']} - {app['status']} ({app['date_applied']})")

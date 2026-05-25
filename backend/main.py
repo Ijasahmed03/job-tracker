@@ -7,7 +7,8 @@ def main():
     print("----------------")
     print("1. Add application")
     print("2. List applications")
-    print("3. Exit")
+    print("3. List by status")
+    print("4. Exit")
 
     choice = input("\nChoose an option: ")
 
@@ -23,6 +24,10 @@ def main():
         list_applications()
 
     elif choice == "3":
+       status = input("Filter by status (applied/interview/offer/rejected): ")
+       list_applications(status_filter=status)
+
+    elif choice == "4":
         print("Goodbye!")
 
     else:
