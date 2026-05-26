@@ -1,19 +1,17 @@
-# models.py - defines what a job application looks like
-#models.py -  data shapes for api
-#Pydantic models validate data automatically
-from pydantic import BaseModel
-from typing  import Optional
+# models.py - SQLAlchemy models
+# Thes define your database tables as python classes
+
+from sqlalchemy import Column, Integer, String
+from database import Base
+
+class JobApplication(Base):
+    __tablename__ = "applications"
+
+    id = Column(Integer, primary_key=True, index= True)
+    company = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    date_applied = Column(String, nullable=False)
+    notes = Column(String, default="")
 
 
-class JobApplicationCreate(BaseModel):
-    company: str
-    role: str
-    status: str
-    date_applied: str
-    notes: Optional[str] = ""
-
-class JobApplicationResponse(JobApplicationCreate):
-    id : int
-
-    class Config:
-        from_attributes = True

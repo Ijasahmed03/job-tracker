@@ -1,41 +1,59 @@
-#applications.py - all routes (endpoints) for job applications
-# A route is one specific thing an API knows how to do
+#applications.py - route handlers for job applications
+# Each function handles one specific HTTP request
 
-from fastapi import APIRouter, HTTPException
-from models import JobApplicationCreate, JobApplicationResponse
-from database import read_db, write_db, get_next_id
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from typing import List
+
+from database import get_db
+from models import JobApplication
+from schemas import JobApplicationCreate, JobApplicationResponse, JobApplicationUpdate
 
 router = APIRouter()
 
 @router.get("/", response_model=List[JobApplicationResponse])
-def get_applications():
-    return read_db()
+def get_applications(db:Session = Depends(get_db)):
+    return db.query(JobApplication).all()
 
 @router.post("/", response_model=JobApplicationResponse)
-def create_application(application: JobApplicationCreate):
-    data = read_db()
-    new_app = application.model_dump()
-    new_app["id"] = get_next_id()
-    data.append(new_app)
-    write_db(data)
+def create_application(
+    application: JobApplicationCreate,
+    db:Session = Depends(get_db)
+    ):
+    new_app = JobApplication(**application.model_dump())
+    db.add(new_app)
+    db.commit()
+    db.refresh(new_app)
     return new_app
 
+@router.get("/{app_id}", response_model=JobApplicationResponse)
+def get_application(app_id: int, db:Session = Depends(get_db)):
+    app = db.query(JobApplication).filter(JobApplication.id == app_id).first()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return app
+
 @router.patch("/{app_id}", response_model=JobApplicationResponse)
-def update_status(app_id: int, status: str):
-    data = read_db()
-    for app in data:
-        if app["id"] == app_id:
-            app["status"] = status
-            write_db(data)
-            return app
-    raise HTTPException(status_code=404, detail="Application not found")
+def update_application(
+    app_id : int,
+    updates: JobApplicationUpdate,
+    db: Session = Depends(get_db)
+):
+    app = db.query(JobApplication).filter(JobApplication.id == app_id).first()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+    update_data = updates.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(app, field, value)
+    db.commit()
+    db.refresh(app)
+    return app
 
 @router.delete("/{app_id}")
-def delete_application(app_id: int):
-    data = read_db
-    updated = [app for app in data if app["id"] != app_id]
-    if len(updated) == len(data):
-        raise HTTPException(status_code=404, detail="Application not found")
-    write_db(updated)
-    return {"message": "Deleted successfully"}
+def delete_application(app_id: int, db: Session = Depends(get_db)):
+   app = db.query(JobApplication).filter(JobApplication.id == app_id).first()
+   if not app:
+       raise HTTPException(status_code=404, detail="Application not found")
+   db.delete(app)
+   db.commit()
+   return {"message": "Deleted successfully"}
