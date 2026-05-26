@@ -10,6 +10,7 @@ class JobApplicationCreate(BaseModel):
     status: str
     date_applied: str
     notes: Optional[str] = ""
+    deadline: Optional[str] = None
 
 class JobApplicationUpdate(BaseModel):
     status: Optional[str] = None

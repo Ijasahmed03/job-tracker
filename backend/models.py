@@ -13,5 +13,6 @@ class JobApplication(Base):
     status = Column(String, nullable=False)
     date_applied = Column(String, nullable=False)
     notes = Column(String, default="")
+    deadline = Column(String, nullable=True)
 
 
