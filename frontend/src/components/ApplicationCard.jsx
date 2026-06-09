@@ -1,10 +1,12 @@
 // displays a single job application
 // with status update and delete functionality
 import {useState} from 'react'
+import ConfirmModal from './ConfirmModal'
 
 function ApplicationCard({application, onDelete, onUpdate}){
 
     const [updating,setUpdating] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
     const statusColors = {
         applied: "bg-blue-100 text-blue-700",
         interview: "bg-yellow-100 text-yellow-700",
@@ -37,10 +39,6 @@ function ApplicationCard({application, onDelete, onUpdate}){
     }
 
     async function handleDelete() {
-        if (!window.confirm(`Delete ${application.role} at ${application.company}?`)){
-            return
-        }
-
         try{
             const response = await fetch(
                 `http://127.0.0.1:8000/applications/${application.id}`,
@@ -50,6 +48,8 @@ function ApplicationCard({application, onDelete, onUpdate}){
             onDelete(application.id)
         }catch(err){
             console.error(err)
+        } finally {
+            setShowConfirm(false)
         }
     }
 
@@ -58,7 +58,7 @@ function ApplicationCard({application, onDelete, onUpdate}){
         <div className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
                 <div>
-                    <h2 className="text-lg font-mediu, text-gray-900">
+                    <h2 className="text-lg font-medium text-gray-900">
                         {application.role}
                     </h2>
                     <p className="text-gray-500 text-sm mt-1">
@@ -66,11 +66,11 @@ function ApplicationCard({application, onDelete, onUpdate}){
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                <span className= {'text-xs font-medium px-3 py-1 rounded-full ${colorClass'}>
+                <span className= {`text-xs font-medium px-3 py-1 rounded-full ${colorClass}`}>
                     {application.status}
                 </span>
                 <button 
-                onClick={handleDelete}
+                onClick={() => setShowConfirm(true)}
                 className = "text-gray-400 hover:text-red-400 transition-colors text-lg leading-none">
                     x
                 </button> 
@@ -105,6 +105,14 @@ function ApplicationCard({application, onDelete, onUpdate}){
                 </select>
 
             </div>
+            {showConfirm && (
+                <ConfirmModal
+                    message={`Delete ${application.role} at ${application.company}? This cannot be undone`}  
+                    onConfirm={handleDelete}
+                    onCancel={() => setShowConfirm(false)}              
+                >
+                </ConfirmModal>
+            )}
         </div>
     )
 }
