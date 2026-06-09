@@ -9,6 +9,7 @@ function App(){
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [statusFilter, setStatusFilter] = useState("all")
 
   useEffect(() => {
     fetchApplications()
@@ -29,6 +30,29 @@ function App(){
   function handleAdd(newApplication){
     setApplications([...applications, newApplication])
   }
+
+  function handleDelete(id){
+    setApplications(applications.filter(app => app.id !== id))
+  }
+
+  function handleUpdate(updatedApp){
+    setApplications(applications.map(app =>
+      app.id === updatedApp.id ? updatedApp : app
+    ))
+  }
+
+  const filteredApplications = statusFilter === "all"
+    ? applications
+    : applications.filter(app => app.status === statusFilter)
+
+  const counts = {
+    all: applications.length,
+    applied: applications.filter(a => a.status === "applied").length,
+    interview: applications.filter(a => a.status === "interview").length,
+    offer: applications.filter(a => a.status === "offer").length,
+    rejected: applications.filter(a => a.status === "rejected").length,
+  }
+
   return(
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -36,15 +60,32 @@ function App(){
         <AddApplicationForm onAdd={handleAdd}/>
 
         <div className="mt-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
             Your Applications({applications.length})
-          </h2>
-
+           </h2>
+          <div className="flex gap-2">
+              {["all", "applied", "interview", "offer", "rejected"].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`text-xs px-3 py-1 rounded-full border transition-colors capitalize
+                    ${statusFilter === status
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                    }`}
+                >
+                  {status} ({counts[status]})
+                </button>
+              ))}
+            </div>
+          </div>
+          
           {loading &&(
             <p className="text-gray-400 text-sm">Loading...</p>
           )}
           {error &&(
-            <p className="text-red-500 tect-sm">{error}</p>
+            <p className="text-red-500 text-sm">{error}</p>
           )}
 
           {!loading && applications.length === 0 &&(
@@ -54,8 +95,8 @@ function App(){
           )}
 
           <div className="grid grid-cols-1 gap-4">
-            {applications.map(app => (
-              <ApplicationCard key={app.id} application={app} />
+            {filteredApplications.map(app => (
+              <ApplicationCard key={app.id} application={app} onDelete={handleDelete} onUpdate={handleUpdate} />
             ))}
           </div>
         </div>
