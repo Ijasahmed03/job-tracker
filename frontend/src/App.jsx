@@ -5,6 +5,35 @@ import ApplicationCard from "./components/ApplicationCard"
 import AddApplicationForm from "./components/AddApplicationForm"
 import Navbar from "./components/Navbar"
 
+function StatsBar({ applications }) {
+  const total = applications.length
+  const interviews = applications.filter(a => a.status === "interview").length
+  const offers = applications.filter(a => a.status === "offer").length
+  const rejected = applications.filter(a => a.status === "rejected").length
+  const rate = total === 0 ? 0 : Math.round((interviews / total) * 100)
+
+  return (
+    <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <p className="text-sm text-gray-500">Total</p>
+        <p className="text-2xl font-medium text-gray-900 mt-1">{total}</p>
+      </div>
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <p className="text-sm text-gray-500">Interviews</p>
+        <p className="text-2xl font-medium text-yellow-600 mt-1">{interviews}</p>
+      </div>
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <p className="text-sm text-gray-500">Offers</p>
+        <p className="text-2xl font-medium text-green-600 mt-1">{offers}</p>
+      </div>
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <p className="text-sm text-gray-500">Interview rate</p>
+        <p className="text-2xl font-medium text-blue-600 mt-1">{rate}%</p>
+      </div>
+    </div>
+  )
+}
+
 function App(){
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
@@ -57,6 +86,7 @@ function App(){
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-5x1 mx-auto px-6 py-8">
+        <StatsBar applications={applications} />
         <AddApplicationForm onAdd={handleAdd}/>
 
         <div className="mt-8">
